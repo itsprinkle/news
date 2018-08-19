@@ -10,36 +10,18 @@
 """""
 import logging
 from flask import current_app
+from flask_script import Manager
+from flask_migrate import Migrate,MigrateCommand
 
-from info import create_app
+from info import create_app,db,models #需要导入models,迁移的时候,知道有该文件存在
 
 #调用方法,获取完整app
-app = create_app("product")
+app = create_app("develop")
 
-@app.route('/',methods=["POST","GET"])
-def hello_world():
-
-    #测试redis存储数据
-    # redis_store.set('name','zhangsan')
-
-    #使用session存储数据
-    # session["age"] = "13"
-    # print(session.get("age"))
-
-    #不在使用print输出了,因为控制不了
-    #使用loggin模块输出
-    logging.debug('这是调试信息')
-    logging.info('这是详细信息')
-    logging.warning('这是警告信息')
-    logging.error('这是错误信息')
-
-    #还可以使用current_app来输出,和上面上面方式输出区别: 在控制台打印有分割线隔开,但是在文件中是一样的
-    # current_app.logger.debug('这是调试信息')
-    # current_app.logger.info('这是详细信息')
-    # current_app.logger.warning('这是警告信息')
-    # current_app.logger.error('这是错误信息')
-
-    return "helloworld1000"
+#配置数据库迁移
+manager = Manager(app,db)
+Migrate(app,db)
+manager.add_command("db",MigrateCommand)
 
 if __name__ == '__main__':
-    app.run()
+    manager.run()
