@@ -1,12 +1,13 @@
 # from info.modules.index import index_blu
 from info import redis_store
 from . import index_blu
+from flask import render_template
 
 @index_blu.route('/',methods=["POST","GET"])
 def hello_world():
 
     #测试redis存储数据
-    redis_store.set('name','zhangsan')
+    # redis_store.set('name','zhangsan')
 
     #使用session存储数据
     # session["age"] = "13"
@@ -25,4 +26,4 @@ def hello_world():
     # current_app.logger.warning('这是警告信息')
     # current_app.logger.error('这是错误信息')
 
-    return "helloworld1000"
+    return render_template('news/index.html')
