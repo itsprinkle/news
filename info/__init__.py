@@ -33,13 +33,13 @@ def create_app(config_name):
 
     # 创建redis对象
     global redis_store
-    redis_store = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT)
+    redis_store = redis.StrictRedis(host=config.REDIS_HOST, port=config.REDIS_PORT,decode_responses=True)
 
     # 读取app中的session信息,指定sessino存储位置
     Session(app)
 
     # 保护app中的路由路径和视图函数
-    CSRFProtect(app)
+    # CSRFProtect(app)
 
     #注册首页蓝图到app中
     from info.modules.index import index_blu

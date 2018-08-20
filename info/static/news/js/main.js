@@ -229,7 +229,8 @@ function generateImageCode() {
     imageCodeId = generateUUID();
 
     //2.拼接图片url地址
-    image_url = '/passport/image_code?cur_id='+imageCodeId + "&pre_id="+preimageCodeId
+    image_url = '/passport/image_code?cur_id='+imageCodeId +
+        "&pre_id="+preimageCodeId
 
     //3.将地址设置到image标签的src属性中,为image_url
     $('.get_pic_code').attr('src',image_url)
@@ -268,13 +269,13 @@ function sendSMSCode() {
     }
 
     //发送获取短信请求
-    /*
+
     $.ajax({
         url:'/passport/sms_code',//请求地址
         type:'post',
         data:JSON.stringify(params),
         contentType:'application/json',
-        headers:{'X-CSRFToken':getCookie('csrf_token')},
+        // headers:{'X-CSRFToken':getCookie('csrf_token')},
         success: function (resp) {
             //判断是否请求成功
             if(resp.errno == '0'){
@@ -309,7 +310,7 @@ function sendSMSCode() {
             }
         }
     })
-    */
+
 }
 
 // 调用该函数模拟点击左侧按钮
