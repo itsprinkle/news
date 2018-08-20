@@ -4,7 +4,7 @@ from . import index_blu
 from flask import render_template,current_app
 
 @index_blu.route('/',methods=["POST","GET"])
-def hello_world():
+def show_index_page():
 
     #测试redis存储数据
     # redis_store.set('name','zhangsan')
