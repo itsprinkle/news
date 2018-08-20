@@ -1,6 +1,6 @@
 import random
 
-from flask import request, jsonify, current_app, make_response, json
+from flask import request, jsonify, current_app, make_response, json, session
 import re
 from info import redis_store, constants, db
 from info.libs.yuntongxun.sms import CCP
@@ -8,6 +8,55 @@ from info.models import User
 from info.utils.captcha.captcha import captcha
 from info.utils.response_code import RET
 from . import passport_blu
+
+# 功能描述: 登陆用户
+# 请求路径: /passport/login
+# 请求方式: POST
+# 请求参数: mobile,password
+# 返回值: errno, errmsg
+@passport_blu.route('/login', methods=['POST'])
+def login():
+    """
+    思路分析:
+    1.获取参数
+    2.校验参数,为空校验
+    3.通过手机号查询数据库,用户对象
+    4.判断用户是否存在
+    5.判断密码是否正确
+    6.记录用户信息到session中
+    7.返回响应
+    :return:
+    """
+    # 1.获取参数
+    mobile = request.json.get("mobile")
+    password = request.json.get("password")
+
+    # 2.校验参数,为空校验
+    if not all([mobile,password]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
+
+    # 3.通过手机号查询数据库,用户对象
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="查询用户失败")
+
+    # 4.判断用户是否存在
+    if not user:
+        return jsonify(errno=RET.NODATA,errmsg="该用户不存在")
+
+    # 5.判断密码是否正确
+    if user.password_hash != password:
+        return jsonify(errno=RET.DATAERR,errmsg="密码错误")
+
+    # 6.记录用户信息到session中
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+    session["mobile"] = user.mobile
+
+    # 7.返回响应
+    return jsonify(errno=RET.OK,errmsg="登陆成功")
 
 
 # 功能描述: 注册用户
@@ -82,7 +131,12 @@ def register():
         current_app.logger.error(e)
         db.session.rollback()
         return jsonify(errno=RET.DBERR,errmsg="用户注册失败")
-    
+
+    # 8.1.记录用户信息到session中
+    session["user_id"] = user.id
+    session["nick_name"] = user.nick_name
+    session["mobile"] = user.mobile
+
     # 9.返回响应
     return jsonify(errno=RET.OK,errmsg="注册成功")
 
@@ -149,18 +203,18 @@ def sms_code():
 
     # 8.生成短信验证码,6位随机数
     sms_code = "%06d"%random.randint(0,999999)
-
+    current_app.logger.debug("短信验证码是 = %s"%sms_code)
     # 9.发送短信
-    try:
-        ccp = CCP()
-        result = ccp.send_template_sms(mobile,[sms_code,constants.SMS_CODE_REDIS_EXPIRES/60],1)
-    except Exception as e:
-        current_app.logger.error(e)
-        return jsonify(errno=RET.THIRDERR,errmsg="云通讯异常")
-
-    # 10.判断是否发送成功
-    if result == -1:
-        return jsonify(errno=RET.DATAERR,errmsg="短信发送失败")
+    # try:
+    #     ccp = CCP()
+    #     result = ccp.send_template_sms(mobile,[sms_code,constants.SMS_CODE_REDIS_EXPIRES/60],1)
+    # except Exception as e:
+    #     current_app.logger.error(e)
+    #     return jsonify(errno=RET.THIRDERR,errmsg="云通讯异常")
+    #
+    # # 10.判断是否发送成功
+    # if result == -1:
+    #     return jsonify(errno=RET.DATAERR,errmsg="短信发送失败")
 
     # 11.保存短信验证码到redis
     try:
