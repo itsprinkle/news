@@ -8,8 +8,6 @@
 6.数据库迁移配置
 
 """""
-import logging
-from flask import current_app
 from flask_script import Manager
 from flask_migrate import Migrate,MigrateCommand
 
@@ -18,10 +16,11 @@ from info import create_app,db,models #需要导入models,迁移的时候,知道
 #调用方法,获取完整app
 app = create_app("develop")
 
-#配置数据库迁移
+#数据库迁移
 manager = Manager(app,db)
 Migrate(app,db)
 manager.add_command("db",MigrateCommand)
 
 if __name__ == '__main__':
+    print(app.url_map)
     manager.run()
