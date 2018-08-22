@@ -11,12 +11,16 @@ $(function () {
 
     // 首页分类切换
     $('.menu li').click(function () {
+        // 获取到所点击分类的,分类编号
         var clickCid = $(this).attr('data-cid')
+        // 遍历所有的li标签,移除所有的li激活事件
         $('.menu li').each(function () {
             $(this).removeClass('active')
         })
+        // 设置当前点击的按钮为激活状态
         $(this).addClass('active')
 
+        // 判断是否点击的是当前按钮
         if (clickCid != currentCid) {
             // 记录当前分类id
             currentCid = clickCid
@@ -67,7 +71,7 @@ function updateNewsData() {
         "cid": currentCid,
         'per_page': 5
     }
-    /*
+
     $.get("/newslist", params, function (resp) {
         // 设置 `数据正在查询数据` 变量为 false，以便下次上拉加载
         house_data_querying = false
@@ -97,5 +101,5 @@ function updateNewsData() {
             }
         }
     })
-    */
+
 }

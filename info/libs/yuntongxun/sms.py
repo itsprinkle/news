@@ -3,13 +3,13 @@
 from info.libs.yuntongxun.CCPRestSDK import REST
 
 # 说明：主账号，登陆云通讯网站后，可在"控制台-应用"中看到开发者主账号ACCOUNT SID
-_accountSid = '8aaf07086077a6e601608c93168b0736'
+_accountSid = '8a216da861f5a257016204a0d5ac06f0'
 
 # 说明：主账号Token，登陆云通讯网站后，可在控制台-应用中看到开发者主账号AUTH TOKEN
-_accountToken = '90894e456c314d6fb9b06d1c39c49bb6'
+_accountToken = '07885bc11c584f1ba6342a3cc8d7d2a4'
 
 # 请使用管理控制台首页的APPID或自己创建应用的APPID
-_appId = '8aaf07086077a6e601608c9316e0073c'
+_appId = '8aaf070865417618016555115f7b09f2'
 
 # 说明：请求地址，生产环境配置成app.cloopen.com
 _serverIP = 'sandboxapp.cloopen.com'
@@ -19,6 +19,28 @@ _serverPort = "8883"
 
 # 说明：REST API版本号保持不变
 _softVersion = '2013-12-26'
+
+# 云通讯官方提供的发送短信代码实例
+# # 发送模板短信
+# # @param to 手机号码
+# # @param datas 内容数据 格式为数组 例如：{'12','34'}，如不需替换请填 ''
+# # @param $tempId 模板Id
+#
+# def sendTemplateSMS(to, datas, tempId):
+#     # 初始化REST SDK
+#     rest = REST(serverIP, serverPort, softVersion)
+#     rest.setAccount(accountSid, accountToken)
+#     rest.setAppId(appId)
+#
+#     result = rest.sendTemplateSMS(to, datas, tempId)
+#     for k, v in result.iteritems():
+#
+#         if k == 'templateSMS':
+#             for k, s in v.iteritems():
+#                 print '%s:%s' % (k, s)
+#         else:
+#             print '%s:%s' % (k, v)
+
 
 class CCP(object):
     """发送短信的辅助类"""

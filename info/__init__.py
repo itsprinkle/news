@@ -10,6 +10,8 @@ from flask_wtf.csrf import generate_csrf
 from config import config_dict
 
 #创建对象SQLAlchemy
+from info.utils.commons import do_index_filter
+
 db = SQLAlchemy()
 
 #定义redis变量
@@ -40,23 +42,34 @@ def create_app(config_name):
     Session(app)
 
     # 保护app中的路由路径和视图函数
-    # CSRFProtect(app)
+    CSRFProtect(app)
 
     #注册首页蓝图到app中
     from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
-    # 注册passport_blu(认证蓝图)到app中
+    #注册认证蓝图到app中
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
 
-    # 使用请求钩子拦截app中所有的请求路径，在cookie中设置csrf_token,传给前端
+    #注册新闻蓝图到app中
+    from info.modules.news import news_blu
+    app.register_blueprint(news_blu)
+
+    #添加过滤器到,默认过滤器列表中
+    app.add_template_filter(do_index_filter,"index_filter")
+
+
+    #使用请求钩子拦截app中所有的请求路径,使用after_request
+    #我们需要做的事情:1.在cookie中设置csrf_token,  2.在提交的时候headers中设置csrf_token
+    #服务器做的事情: 取出二者做校验
     @app.after_request
     def after_request(resp):
         csrf_token = generate_csrf()
         resp.set_cookie("csrf_token",csrf_token)
         return resp
 
+    print(app.url_map)
     return app
 
 

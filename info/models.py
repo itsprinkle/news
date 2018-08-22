@@ -58,14 +58,17 @@ class User(BaseModel, db.Model):
     # 当前用户所发布的新闻
     news_list = db.relationship('News', backref='user', lazy='dynamic')
 
+    #使用property装饰方法之后,可以当成属性来使用,是一个getter方法
     @property
     def password(self):
         raise AttributeError("当前属性不可读")
 
+    #给password熟悉添加一个setter方法设置值
     @password.setter
     def password(self, value):
         self.password_hash = generate_password_hash(value)
 
+    #如果校验相等,返回 True, 否则False
     def check_passowrd(self, password):
         return check_password_hash(self.password_hash, password)
 
