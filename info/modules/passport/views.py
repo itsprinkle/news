@@ -237,16 +237,16 @@ def login():
 
 
 # 退出功能实现
-# @passport_blu.route('/logout',methods=['POST'])
-# def logout():
-#     """
-#     # 删除之前保存到服务器的session
-#     :return:
-#     """
-#     session.pop('user.id',None)
-#     session.pop('user.nick_name', None)
-#     session.pop('user.mobile', None)
-#     return jsonify(errno=RET.OK,errmsg="ok")
+@passport_blu.route('/logout',methods=['POST'])
+def logout():
+    """
+    # 删除之前保存到服务器的session
+    :return:
+    """
+    session.pop('user_id',None)
+    session.pop('nick_name', None)
+    session.pop('mobile', None)
+    return jsonify(errno=RET.OK,errmsg="ok")
 
 
 

@@ -130,7 +130,7 @@ $(function(){
             type:'post',
             data:JSON.stringify(params),
             contentType:'application/json',
-            // headers:{'X-CSRFToken':getCookie('csrf_token')},
+            headers:{'X-CSRFToken':getCookie('csrf_token')},
             success: function (resp) {
                 //判断是否登陆成功
                 if(resp.errno == '0'){
@@ -188,7 +188,7 @@ $(function(){
             type:'post',
             data:JSON.stringify(params),
             contentType:'application/json',
-            // headers:{'X-CSRFToken':getCookie('csrf_token')},
+            headers:{'X-CSRFToken':getCookie('csrf_token')},
             success: function (resp) {
                 //判断是否注册成功
                 if(resp.errno == '0'){
@@ -209,7 +209,6 @@ function logout() {
     $.ajax({
         url:'/passport/logout',
         type:'post',
-        contentType:'application/json',
         headers:{'X-CSRFToken':getCookie('csrf_token')},
         success:function (resp) {
             window.location.reload()

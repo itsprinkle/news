@@ -6,6 +6,7 @@ from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 import redis
 from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 from config import config_dict
 
 #创建对象SQLAlchemy
@@ -48,6 +49,13 @@ def create_app(config_name):
     # 注册passport_blu(认证蓝图)到app中
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    # 使用请求钩子拦截app中所有的请求路径，在cookie中设置csrf_token,传给前端
+    @app.after_request
+    def after_request(resp):
+        csrf_token = generate_csrf()
+        resp.set_cookie("csrf_token",csrf_token)
+        return resp
 
     return app
 
