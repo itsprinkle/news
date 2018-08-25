@@ -47,6 +47,10 @@ class User(BaseModel, db.Model):
 
     # 当前用户收藏的所有新闻
     collection_news = db.relationship("News", secondary=tb_user_collection, lazy="dynamic")  # 用户收藏的新闻
+
+    # 添加关系属性,获取到用户的所有点赞
+    comment_likes = db.relationship("CommentLike")
+
     # 用户所有的粉丝，添加了反向引用followed，代表用户都关注了哪些人
     followers = db.relationship('User',
                                 secondary=tb_user_follows,

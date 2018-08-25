@@ -56,6 +56,10 @@ def create_app(config_name):
     from info.modules.news import news_blu
     app.register_blueprint(news_blu)
 
+    #注册用户蓝图到app中
+    from info.modules.profile import profile_blu
+    app.register_blueprint(profile_blu)
+
     #添加过滤器到,默认过滤器列表中
     app.add_template_filter(do_index_filter,"index_filter")
 

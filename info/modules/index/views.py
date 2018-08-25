@@ -40,11 +40,10 @@ def news_list():
 
     # 3.分页查询(paginate)
     try:
-
         #判断分类编号是否等于1
         filters = []
         if cid != '1':
-            filters.append(News.category_id == 1)
+            filters.append(News.category_id == cid)
 
         paginate = News.query.filter(*filters).order_by(News.create_time.desc()).paginate(page,per_page,False)
     except Exception as e:

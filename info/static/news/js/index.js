@@ -75,7 +75,7 @@ function updateNewsData() {
     $.get("/newslist", params, function (resp) {
         // 设置 `数据正在查询数据` 变量为 false，以便下次上拉加载
         house_data_querying = false
-        if (resp) {
+        if (resp.errno = '0') {
             // // 记录总页数
             total_page = resp.totalPage
             // 如果当前页数为1，则清空原有数据
@@ -99,6 +99,8 @@ function updateNewsData() {
                 content += '</li>'
                 $(".list_con").append(content)
             }
+        }else{
+            alert(resp.errmsg)
         }
     })
 
