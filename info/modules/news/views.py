@@ -5,6 +5,68 @@ from info.utils.response_code import RET
 from . import news_blu
 from flask import render_template, session, current_app, g, jsonify, abort, request
 
+
+# 关注/取消关注
+@news_blu.route('/followed_user',methods=["POST"])
+@user_login_data
+def followed_user():
+    if not g.user:
+        return jsonify(errno=RET.PARAMERR,errmsg="用户未登录")
+    # 获取参数
+    author_id = request.json.get("user_id")
+    action =request.json.get("action")
+    if not all([author_id,action]):
+        return jsonify(errno= RET.PARAMERR,errmasg="参数不完整")
+    if not action in ["follow","unfollow"]:
+        return jsonify(errno=RET.DATAERR, errmsg="操作类型错误")
+
+    # 获取作者对象
+    try:
+        author = User.query.get(author_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg="作者获取失败")
+    if not author:
+        return jsonify(errno=RET.NODATA, errmsg="作者不存在")
+    # 判断是否关注过
+    try:
+        if action:
+            if not g.user in author.followers:
+                author.followers.append(g.user)
+        else:
+            if g.user in author.followers:
+                author.follows.remove(g.user)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DATAERR, errmsg="操作失败")
+    # success
+    return jsonify(errno=RET.OK, errmsg="操作成功")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 功能描述: 点赞/取消点赞
 # 请求路径: /news/comment_like
 # 请求方式: POST
@@ -228,6 +290,9 @@ def news_collect():
 # 请求方式: GET
 # 请求参数:news_id
 # 返回值: detail.html页面, 用户data字典数据
+
+
+
 @news_blu.route('/<int:news_id>')
 @user_login_data
 def news_detail(news_id):
@@ -291,12 +356,21 @@ def news_detail(news_id):
 
         comment_list.append(comment_dict)
 
+
+    # 判断当前用户是否有关注过该新闻的作者
+    is_followed = False
+
+    if g.user and news.user:
+        if g.user in news.user.followers:
+            is_followed = True
+
     #拼接数据渲染页面
     data = {
         "user_info": g.user.to_dict() if g.user else "",
         "click_news_list":click_news_list,
         "news":detail_news.to_dict(),
         "is_collected":is_collected,
-        "comments":comment_list
+        "comments":comment_list,
+        "is_followed":is_followed
     }
     return render_template('news/detail.html',data=data)

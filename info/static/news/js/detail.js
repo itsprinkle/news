@@ -307,7 +307,7 @@ $(function(){
 
         // 关注当前新闻作者
     $(".focus").click(function () {
-        /*
+
         var user_id = $(this).attr('data-userid')
         var params = {
             "action": "follow",
@@ -335,15 +335,16 @@ $(function(){
                 }else {
                     // 关注失败
                     alert(resp.errmsg)
+                    // alert("关注失败")
                 }
             }
         })
-        */
+
     })
 
     // 取消关注当前新闻作者
     $(".focused").click(function () {
-        /*
+
         var user_id = $(this).attr('data-userid')
         var params = {
             "action": "unfollow",
@@ -370,11 +371,12 @@ $(function(){
                     $('.login_form_con').show();
                 }else {
                     // 取消关注失败
-                    alert(resp.errmsg)
+                    // alert(resp.errmsg)
+                    alert('取消关注失败')
                 }
             }
         })
-        */
+
     })
 })
 

@@ -2,6 +2,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask,session
+from flask import g
+from flask import render_template
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 import redis
@@ -10,7 +12,7 @@ from flask_wtf.csrf import generate_csrf
 from config import config_dict
 
 #创建对象SQLAlchemy
-from info.utils.commons import do_index_filter
+from info.utils.commons import do_index_filter, user_login_data
 
 db = SQLAlchemy()
 
@@ -63,7 +65,14 @@ def create_app(config_name):
     #添加过滤器到,默认过滤器列表中
     app.add_template_filter(do_index_filter,"index_filter")
 
-
+    # 拦截所有404错误信息
+    @app.errorhandler(404)
+    @user_login_data
+    def page_not_found(e):
+        data = {
+            "user_info":g.user.to_dict() if g.user else ""
+        }
+        return render_template("news/404.html",data=data)
     #使用请求钩子拦截app中所有的请求路径,使用after_request
     #我们需要做的事情:1.在cookie中设置csrf_token,  2.在提交的时候headers中设置csrf_token
     #服务器做的事情: 取出二者做校验
@@ -75,6 +84,9 @@ def create_app(config_name):
 
     print(app.url_map)
     return app
+
+
+
 
 
 #记录日志信息
