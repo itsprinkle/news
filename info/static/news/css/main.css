@@ -1,5 +1,6 @@
 body{
-    background:#f1f2f6;
+    /*background:#f1f2f6;*/
+    background:url('./bg03.gif');
     font-family:'Microsoft YaHei';
 }
 .header_con{

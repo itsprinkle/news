@@ -1,49 +1,180 @@
 from info import constants, db
-from info.models import News, Category
+from info.models import News, Category, User
 from info.utils.commons import user_login_data
 from info.utils.image_storage import image_storage
 from info.utils.response_code import RET
 from . import profile_blu
 from flask import render_template, g, redirect, request, jsonify, current_app
 
-
-# 获取作者个人中心
-
-@profile_blu.route('/other')
-
-def other():
+# 获取关注列表
+# 请求路径: /user/user_follow
+# 请求方式: GET
+# 请求参数:p
+# 返回值: 渲染user_follow.html页面,字典data数据
+@profile_blu.route('/user_follow')
+@user_login_data
+def user_follow():
     """
-    # 获取参数
-    # 校验参数
-    # 获取作者对象
-    # 判断作者对象是否存在
-    # 携带作者信息渲染
+    思路分析:
+    1.获取参数
+    2.参数类型转换
+    3.分页查询关注列表
+    4.获取总页数,当前页,当前页对象
+    5.当前页对象转成字典列表
+    6.携带数据渲染页面
     :return:
     """
+    # 1.获取参数
+    page = request.args.get("p",1)
+
+    # 2.参数类型转换
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    # 3.分页查询关注列表
+    try:
+        paginate = g.user.followed.paginate(page,4,False)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="获取关注列表失败")
+
+    # 4.获取总页数,当前页,当前页对象
+    totalPage = paginate.pages
+    currentPage = paginate.page
+    items = paginate.items
+
+    # 5.当前页对象转成字典列表
+    user_list = []
+    for item in items:
+        user_list.append(item.to_dict())
+
+    # 6.携带数据渲染页面
+    data = {
+        "totalPage":totalPage,
+        "currentPage":currentPage,
+        "user_list":user_list
+    }
+    return render_template('news/user_follow.html',data=data)
+
+# 获取作者个人中心,新闻列表
+# 请求路径: /user/other_news_list
+# 请求方式: GET
+# 请求参数:p,user_id
+# 返回值: errno,errmsg
+@profile_blu.route('/other_news_list')
+def other_news_list():
+    """
+    1.获取参数,p.user_id
+    2.校验操作,为空校验,参数类型转换
+    3.查询作者对象
+    4.判断作者对象是否存在
+    5.分页查询作者发布的新闻
+    6.获取总页数,当前页,当前页对象
+    7.返回响应,携带数据
+    :return:
+    """
+    # 1.获取参数,p.user_id
+    page = request.args.get("p",1)
+    author_id = request.args.get("user_id")
+
+    # 2.校验操作,为空校验,参数类型转换
+    if not author_id:
+        return jsonify(errno=RET.PARAMERR,errmsg="作者编号为空")
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        page = 1
+
+    # 3.查询作者对象
+    try:
+        author = User.query.get(author_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="获取作者失败")
 
 
+    # 4.判断作者对象是否存在
+    if not author:
+        return jsonify(errno=RET.NODATA,errmsg="作者不存在")
 
+    # 5.分页查询作者发布的新闻
+    try:
+        paginate = author.news_list.order_by(News.create_time.desc()).paginate(page,1,False)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="获取新闻列表失败")
 
+    # 6.获取总页数,当前页,当前页对象
+    total_page = paginate.pages
+    current_page = paginate.page
+    items = paginate.items
 
+    # 新闻对象列表转成字典列表
+    news_list = []
+    for item in items:
+        news_list.append(item.to_dict())
 
+    # 7.返回响应,携带数据
+    data = {
+        "total_page":total_page,
+        "current_page":current_page,
+        "news_list":news_list
+    }
+    return jsonify(errno=RET.OK,errmsg="获取成功",data=data)
 
+# 获取作者个人中心
+# 请求路径: /user/other
+# 请求方式: GET
+# 请求参数:id
+# 返回值: 渲染other.html页面,字典data数据
+@profile_blu.route('/other')
+@user_login_data
+def other():
+    """
+    1. 获取参数
+    2. 校验参数
+    3. 获取作者对象
+    4. 判断作者对象是否存在
+    5. 携带作者信息渲染页面
+    :return:
+    """
+    # 1. 获取参数
+    author_id = request.args.get("id")
 
+    # 2. 校验参数
+    if not author_id:
+        return jsonify(errno=RET.NODATA,errmsg="作者编号不存在")
 
+    # 3. 获取作者对象
+    try:
+        author = User.query.get(author_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="作者获取失败")
 
+    # 4. 判断作者对象是否存在
+    if not author:
+        return jsonify(errno=RET.NODATA,errmsg="作者不存在")
 
+    #4.1判断当前用户有没有关注该作者
+    is_followed = False
+    if g.user:
+        if g.user in author.followers:
+            is_followed = True
 
+    # 5. 携带作者信息渲染页面
+    data = {
+        "author_info":author.to_dict(),
+        "is_followed":is_followed,
+        "user_info":g.user.to_dict() if g.user else ""
 
-
-
-
-
-
-
-
-
-
-
-
+    }
+    return render_template('news/other.html',data=data)
 
 
 

@@ -335,7 +335,6 @@ $(function(){
                 }else {
                     // 关注失败
                     alert(resp.errmsg)
-                    // alert("关注失败")
                 }
             }
         })
@@ -371,12 +370,10 @@ $(function(){
                     $('.login_form_con').show();
                 }else {
                     // 取消关注失败
-                    // alert(resp.errmsg)
-                    alert('取消关注失败')
+                    alert(resp.errmsg)
                 }
             }
         })
-
     })
 })
 

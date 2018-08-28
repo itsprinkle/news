@@ -41,7 +41,7 @@ def news_list():
     # 3.分页查询(paginate)
     try:
         #判断分类编号是否等于1
-        filters = []
+        filters = [News.status == 0]
         if cid != '1':
             filters.append(News.category_id == cid)
 

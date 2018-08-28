@@ -27,15 +27,15 @@ def image_storage(image_data):
     else:
         return ""
 
-
-if __name__ == '__main__':
-
-    with open('./11.jpg','rb') as file:
-        image_name =  image_storage(file.read())
-        if image_name:
-            print("上传成功")
-        else:
-            print("上传失败")
+# 为了在当前文件运行测试上传
+# if __name__ == '__main__':
+#
+#     with open('./11.jpg','rb') as file:
+#         image_name =  image_storage(file.read())
+#         if image_name:
+#             print("上传成功")
+#         else:
+#             print("上传失败")
 
 
 

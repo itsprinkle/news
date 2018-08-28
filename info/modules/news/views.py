@@ -6,65 +6,68 @@ from . import news_blu
 from flask import render_template, session, current_app, g, jsonify, abort, request
 
 
-# 关注/取消关注
-@news_blu.route('/followed_user',methods=["POST"])
+
+
+# 关注/取消关注作者
+# 请求路径: /news/followed_user
+# 请求方式: POST
+# 请求参数:user_id,action
+# 返回值: errno, errmsg
+@news_blu.route('/followed_user', methods=['POST'])
 @user_login_data
 def followed_user():
+    """
+    1.判断用户是否登陆
+    2.获取参数
+    3.校验参数,为空校验,操作类型校验
+    4.获取作者对象
+    5.判断作者对象是否存在
+    6.根据操作类型,取消/关注
+    7.返回响应
+    :return:
+    """
+    # 1.判断用户是否登陆
     if not g.user:
         return jsonify(errno=RET.PARAMERR,errmsg="用户未登录")
-    # 获取参数
-    author_id = request.json.get("user_id")
-    action =request.json.get("action")
-    if not all([author_id,action]):
-        return jsonify(errno= RET.PARAMERR,errmasg="参数不完整")
-    if not action in ["follow","unfollow"]:
-        return jsonify(errno=RET.DATAERR, errmsg="操作类型错误")
 
-    # 获取作者对象
+    # 2.获取参数
+    author_id = request.json.get("user_id")
+    action = request.json.get("action")
+
+    # 3.校验参数,为空校验,操作类型校验
+    if not all([author_id,action]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不全")
+
+    if not action in ["follow","unfollow"]:
+        return jsonify(errno=RET.DATAERR,errmsg="操作类型有误")
+
+    # 4.获取作者对象
     try:
         author = User.query.get(author_id)
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify(errno=RET.DBERR, errmsg="作者获取失败")
+        return jsonify(errno=RET.DBERR,errmsg="作者获取失败")
+    
+    # 5.判断作者对象是否存在
     if not author:
-        return jsonify(errno=RET.NODATA, errmsg="作者不存在")
-    # 判断是否关注过
+        return jsonify(errno=RET.NODATA,errmsg="该作者不存在")
+    
+    # 6.根据操作类型,取消/关注
     try:
-        if action:
+        if action == "follow":
+            #判断是否有关注过
             if not g.user in author.followers:
                 author.followers.append(g.user)
         else:
-            if g.user in author.followers:
-                author.follows.remove(g.user)
+            #判断是否有关注过
+            if  g.user in author.followers:
+                author.followers.remove(g.user)
     except Exception as e:
         current_app.logger.error(e)
-        return jsonify(errno=RET.DATAERR, errmsg="操作失败")
-    # success
-    return jsonify(errno=RET.OK, errmsg="操作成功")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return jsonify(errno=RET.DBERR,errmsg="操作失败")
+        
+    # 7.返回响应
+    return jsonify(errno=RET.OK,errmsg="操作成功")
 
 
 # 功能描述: 点赞/取消点赞
@@ -290,9 +293,6 @@ def news_collect():
 # 请求方式: GET
 # 请求参数:news_id
 # 返回值: detail.html页面, 用户data字典数据
-
-
-
 @news_blu.route('/<int:news_id>')
 @user_login_data
 def news_detail(news_id):
@@ -356,10 +356,8 @@ def news_detail(news_id):
 
         comment_list.append(comment_dict)
 
-
-    # 判断当前用户是否有关注过该新闻的作者
+    #判断当前用户是否有关注,该新闻的作者
     is_followed = False
-
     if g.user and news.user:
         if g.user in news.user.followers:
             is_followed = True
